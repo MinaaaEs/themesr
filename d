@@ -72,3 +72,14 @@ mytheme <- function(type=c("base", "dashboard")){
   }
 
     }
+mytitle <- function(){
+shinydashboard::dashboardHeader(
+  title = "Demo",
+  tags$li(class = "dropdown",
+          tags$a(href = 'https://google.com',
+                 tags$img(src = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png', height= 50,width= 50, align = "right")
+          )
+  ),
+  dropdownMenuOutput('messageMenu')
+)
+}
