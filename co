@@ -35,3 +35,100 @@ rhandsontable(DF, col_highlight = col_highlight,
       
       return td;
   }")
+
+
+library(shiny)
+library(rhandsontable)
+
+change_hook <- "function(el, x, v) {
+  hot = this.hot;
+  cellchngs = [];
+  afterChange = function(changes, source) {
+    $.each(changes, function (index, elem) {
+      change = elem;                  /* gather the row, col, old, new values */
+      if(change[2] !== change[3]) {   /* if old isn't the same as new */
+        cellchg = ({rowind: change[0], colind: change[1]});
+        cellchngs.push(cellchg);      /* add row and column indicies to array */
+      }
+    });
+    $.each(cellchngs, function(ind, elem) { 
+      td = hot.getCell(elem['rowind'], elem['colind']); /* get the html element */
+      if(v.indexOf(elem['rowind']) > -1) {
+        td.style.background = 'cyan';                     /* set background color */
+      } else {
+        td.style.background = 'pink';                     /* set background color */
+      }
+    });
+  }
+  hot.addHook('afterChange', afterChange);  /* add event to table */
+}"
+
+
+change_hook <- "function(el,x,data) {
+  hot = this.hot;
+  cellchngs = [];
+  afterChange = function(changes, source) {
+    $.each(changes, function (index, elem) {
+      change = elem;                  /* gather the row, col, old, new values */
+      if(change[2] !== change[3]) {   /* if old isn't the same as new */
+        cellchg = ({rowind: change[0], colind: change[1]});
+        cellchngs.push(cellchg);      /* add row and column indicies to array */
+      }
+    });
+    $.each(cellchngs, function(ind, elem) { 
+      td = hot.getCell(elem['rowind'], elem['colind']); /* get the html element */
+if (data.vat.indexOf(elem['colind']) > -1){
+if (data.yat.indexOf(elem['rowind']) > -1){
+      td.style.background = 'cyan';                     /* set background color */
+}
+else {
+  td.style.background = 'pink';                     /* set background color */
+}
+}
+else {
+ td.style.background = 'lightgreen';                     /* set background color */
+}
+    });
+  }
+  hot.addHook('afterChange', afterChange);  /* add event to table */
+}"
+
+df <- data.frame(
+  vat = c(0,1,2,3),
+  yat= c(0,1,2,4),
+  stringsAsFactors = FALSE
+)
+
+df <- list(
+  vat = c(0,1,2,3),
+  yat= c(0,1),
+  stringsAsFactors = FALSE
+)
+
+
+ui <- div(actionButton(inputId = "reset_button",label = "Reset")
+          ,rHandsontableOutput(outputId="mtcars"))
+
+
+server <- function(input, output, session) {
+  
+  
+  reset <- reactiveVal(0)
+  output$mtcars <- renderRHandsontable({
+    r = reset()
+    rht = rhandsontable(mtcars,reset=r,stretchH="all",height=300)
+    reset(0)
+    htmlwidgets::onRender(rht, change_hook, data=df)
+  })
+  
+  observeEvent(input$reset_button,
+               {
+                 reset(1)
+               })
+}
+
+shinyApp(ui, server)
+
+
+
+
