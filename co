@@ -129,6 +129,22 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
+   hot_cols(
+        renderer = paste0("function(instance, td, row, col, prop, value, cellProperties) {
+          Handsontable.renderers.NumericRenderer.apply(this, arguments);
+          
+          const formatter = new Intl.NumberFormat('fr-FR', {
+            maximumFractionDigits: 2
+          })
+          
+          
+ td.innerHTML = `${formatter.format(value).replace(',', '.')}`;
+
+          
+
+        
+         }
+      ")
 
 
 
