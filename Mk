@@ -159,3 +159,40 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 
+
+
+
+library(shiny)
+
+ui <- fluidPage(
+  tags$head(
+    tags$script(
+      HTML(
+        "
+        $(document).ready(function() {
+          $('#undoButton').click(function() {
+            var e = jQuery.Event('keydown');
+            e.which = 90;  // 90 is the key code for 'Z'
+            e.ctrlKey = true;
+            $(document).trigger(e);
+          });
+        });
+        "
+      )
+    )
+  ),
+  fluidRow(
+    rHandsontableOutput("hot"),
+    actionButton("undoButton", "Undo (CTRL+Z)")
+  )
+)
+
+server <- function(input, output) {
+  output$hot <- renderRHandsontable({
+    rhandsontable(data.frame(A = c(1, 2, 3), B = c(4, 5, 6)))
+  })
+}
+
+shinyApp(ui, server)
+
+
