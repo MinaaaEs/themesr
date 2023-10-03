@@ -196,3 +196,35 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 
+library(shiny)
+library(rhandsontable)
+
+ui <- fluidPage(
+  tags$head(
+    tags$script(
+      HTML(
+        "
+        $(document).ready(function() {
+          $('#undoButton').click(function() {
+            var hot = $('#hot').handsontable('getInstance');
+            hot.undo();
+          });
+        });
+        "
+      )
+    )
+  ),
+  fluidRow(
+    rHandsontableOutput("hot"),
+    actionButton("undoButton", "Undo (CTRL+Z)")
+  )
+)
+
+server <- function(input, output) {
+  output$hot <- renderRHandsontable({
+    rhandsontable(data.frame(A = c(1, 2, 3), B = c(4, 5, 6)))
+  })
+}
+
+shinyApp(ui, server)
+
