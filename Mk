@@ -33,3 +33,56 @@ server <- function(input, output) {
 }
 
 shinyApp(ui, server)
+
+
+
+
+
+library(shiny)
+
+ui <- fluidPage(
+  tags$head(
+    tags$script(
+      HTML(
+        "
+        var dataHistory = [];
+        
+        $(document).on('keydown', function(e) {
+          if (e.ctrlKey && e.which === 90) {  // 90 is the key code for 'Z'
+            if (dataHistory.length > 1) {
+              dataHistory.pop(); // Remove current state
+              var previousState = dataHistory.pop(); // Get previous state
+              Shiny.setInputValue('undoButton', previousState, {priority: 'event'});
+            }
+          }
+        });
+        "
+      )
+    )
+  ),
+  fluidRow(
+    rHandsontableOutput("hot"),
+    actionButton("undoButton", "Undo")
+  )
+)
+
+server <- function(input, output, session) {
+  data <- reactiveVal(data.frame(A = c(1, 2, 3), B = c(4, 5, 6)))
+
+  observeEvent(input$undoButton, {
+    dataHistory <- isolate(dataHistory)
+    if (length(dataHistory) > 1) {
+      data(dataHistory[[length(dataHistory) - 1]])
+      dataHistory <- dataHistory[1:(length(dataHistory) - 1)]
+    }
+  })
+
+  output$hot <- renderRHandsontable({
+    dataHistory <- isolate(dataHistory)
+    dataHistory <- c(dataHistory, list(data()))
+    rhandsontable(data())
+  })
+}
+
+shinyApp(ui, server)
+
