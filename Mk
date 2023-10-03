@@ -136,3 +136,26 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
+
+library(shiny)
+
+ui <- fluidPage(
+  fluidRow(
+    rHandsontableOutput("hot"),
+    actionButton("undoButton", "Undo (CTRL+Z)")
+  )
+)
+
+server <- function(input, output) {
+  output$hot <- renderRHandsontable({
+    rhandsontable(data.frame(A = c(1, 2, 3), B = c(4, 5, 6)))
+  })
+
+  observeEvent(input$undoButton, {
+    # Simulate CTRL+Z functionality
+    session$sendCustomMessage(type = "keypress", key = "z", ctrlKey = TRUE)
+  })
+}
+
+shinyApp(ui, server)
+
