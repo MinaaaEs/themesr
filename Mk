@@ -264,4 +264,48 @@ shinyApp(ui, server)
 
 
 
+library(shiny)
+library(rhandsontable)
+
+ui <- fluidPage(
+  rHandsontableOutput("hot"),
+  actionButton("undoBtn", "Undo"),
+  actionButton("redoBtn", "Redo")
+)
+
+server <- function(input, output, session) {
+  # Sample data
+  data <- data.frame(
+    ID = c(1, 2, 3),
+    Name = c("John", "Jane", "Doe"),
+    Value = c(10, 20, 30)
+  )
+
+  output$hot <- renderRHandsontable({
+    rhandsontable(data) %>%
+      hot_context_menu(undo = TRUE, redo = TRUE)
+  })
+
+  observeEvent(input$undoBtn, {
+    proxy <- hot_to_r(input$hot)
+    proxy <- hot_undo(proxy)
+    output$hot <- renderRHandsontable({
+      rhandsontable(proxy) %>%
+        hot_context_menu(undo = TRUE, redo = TRUE)
+    })
+  })
+
+  observeEvent(input$redoBtn, {
+    proxy <- hot_to_r(input$hot)
+    proxy <- hot_redo(proxy)
+    output$hot <- renderRHandsontable({
+      rhandsontable(proxy) %>%
+        hot_context_menu(undo = TRUE, redo = TRUE)
+    })
+  })
+}
+
+shinyApp(ui, server)
+
+
 
