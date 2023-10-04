@@ -307,5 +307,40 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
+library(shiny)
+
+# Simulated data for demonstration
+initial_data <- data.frame(ID = 1:5, Value = c(10, 15, 8, 12, 20))
+
+# Define the Shiny app
+ui <- fluidPage(
+  titlePanel("Live Updates Example"),
+  tableOutput("table")
+)
+
+server <- function(input, output, session) {
+  # Reactive function to poll for changes in data
+  updated_data <- reactivePoll(
+    intervalMillis = 1000,  # Poll every 1 second (adjust as needed)
+    session = session,
+    checkFunc = function() {
+      # Check if data has changed (you can customize this condition)
+      # For demonstration, let's say data changes if a random number is greater than 0.5
+      runif(1) > 0.5
+    },
+    valueFunc = function() {
+      # Simulate updated data
+      data.frame(ID = 1:5, Value = sample(1:30, 5))
+    }
+  )
+
+  # Render the updated table
+  output$table <- renderTable({
+    updated_data()
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
 
 
